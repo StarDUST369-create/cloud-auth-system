@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auth Demo</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; }
+    input, button { display: block; margin: 10px 0; width: 100%; padding: 8px; }
+    #profile { margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h2>Register</h2>
+  <input id="reg-username" placeholder="Username">
+  <input id="reg-email" placeholder="Email">
+  <input id="reg-password" type="password" placeholder="Password">
+  <button onclick="register()">Register</button>
+
+  <h2>Login</h2>
+  <input id="login-username" placeholder="Username">
+  <input id="login-password" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+
+  <div id="profile" style="display: none;">
+    <h2>Profile</h2>
+    <button onclick="getProfile()">Load Profile</button>
+    <pre id="profile-data"></pre>
+  </div>
+
+  <script>
+    const baseURL = 'https://cloud-auth-app.onrender.com/api';
+    let token = '';
+
+    function register() {
+      fetch(`${baseURL}/register/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('reg-username').value,
+          email: document.getElementById('reg-email').value,
+          password: document.getElementById('reg-password').value
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          token = data.token;
+          alert('Registered and logged in!');
+          document.getElementById('profile').style.display = 'block';
+        } else {
+          alert('Registration failed');
+          console.log(data);
+        }
+      });
+    }
+
+    function login() {
+      fetch(`${baseURL}/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('login-username').value,
+          password: document.getElementById('login-password').value
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          token = data.token;
+          alert('Logged in!');
+          document.getElementById('profile').style.display = 'block';
+        } else {
+          alert('Login failed');
+          console.log(data);
+        }
+      });
+    }
+
+    function getProfile() {
+      fetch(`${baseURL}/profile/`, {
+        headers: { 'Authorization': `Token ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('profile-data').innerText = JSON.stringify(data, null, 2);
+      });
+    }
+  </script>
+
+</body>
+</html>
